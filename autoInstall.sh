@@ -49,7 +49,7 @@ grep "model name" /proc/cpuinfo | cut -f2 -d:
 read -p "按任意键进入安装主程序"
 echo -e "正在为您初始化必要的插件"
 sleep 1
-yum -y install vim wget links net-tools yum-utils device-mapper-persistent-data lvm2 lrzsz
+yum -y install vim wget links net-tools yum-utils device-mapper-persistent-data lvm2 lrzsz zip unzip
 
 while [ ${isFinish} -eq 0 ] ;do
     echo -e "\t"
@@ -60,6 +60,7 @@ while [ ${isFinish} -eq 0 ] ;do
     echo -e "3: JDK的安装            4: MySQL的安装"
     echo -e "5: Maven的安装          6: git的安装"
     echo -e "7: Docker的安装         8: Jenkins的安装"
+    echo -e "9: Nginx的安装              10: PHP的安装"
     echo -e "------------------------------------------"
     read -p "请输入:" projectId
 	
@@ -587,6 +588,108 @@ while [ ${isFinish} -eq 0 ] ;do
             		
             echo -e "-----------------------------------------------"
             echo -e "jenkins 安装完成，请回主菜单根据提示开放" ${runPost} "端口"
+            
+            read -p "按任意键继续"
+        fi
+    fi
+    
+    # 9. nginx的安装
+    if [ ${projectId} -eq 9 ]
+        then		
+        echo -e "正在自动化安装ngnx，请稍后..."
+        
+        echo -e "添加源"
+        sudo rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+
+        echo -e "安装Nginx"
+        sudo yum install -y nginx
+
+        echo -e "启动Nginx"
+        sudo systemctl start nginx.service
+        
+        read -p "是否开机启动?Y/N:" rebootStart
+        if [ ${rebootStart} = "Y" -o ${rebootStart} = "y" ]
+            then
+            sudo systemctl enable nginx.service
+        fi
+            
+        echo -e "已添加开启启动"
+        		
+        echo -e "检查是否安装成功"
+        nginx -v
+		
+        echo -e "-----------------------------------------------"
+        echo -e "nginx 安装完成"
+            
+        read -p "按任意键继续"
+    fi
+    
+    # 10. PHP的安装
+    if [ ${projectId} -eq 10 ]
+        then		
+        echo -e "正在自动化安装php，请稍后..."
+        
+        echo -e "安装默认版本的php"
+        yum install -y php php-deve
+                		
+        echo -e "检查是否安装成功"
+        php -v
+		
+        echo -e "-----------------------------------------------"
+        echo -e "php 安装完成"
+            
+        read -p "按任意键继续"
+    fi
+    
+    # 10. 禅道的安装
+    if [ ${projectId} -eq 10 ]
+        then
+        echo -e "\t"
+        echo -e "\t"
+        echo -e "\t======================"
+        echo -e "\t请选择禅道的版本"
+        echo -e "\t\t 1: Maven 3.6.3"
+        echo -e "\t\t--------------------"
+        read -p "请输入:" mavenVersion
+		
+        if [ ${mavenVersion} -eq 1 ]
+            then
+            echo -e "正在自动化安装maven 3.6.3，请稍后..."
+
+            echo -e "进入本机的源文件目录"
+            cd /usr/local/src
+			
+            echo -e "下载官方文件包"
+            wget -O /usr/local/src/maven.tar.gz https://mirrors.bfsu.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+            
+            echo -e "创建maven目录并解压官方文件包"
+            mkdir -p /usr/local/maven && tar -xzvf /usr/local/src/maven.tar.gz -C /usr/local/maven --strip-components 1
+            			
+            echo -e "配置环境变量"
+            reg_str="^\s*export\s*MAVEN_HOME=/usr/local/maven"
+			
+            if grep -q $reg_str /etc/profile
+                then
+                    echo $MAVEN_HOME 已在配置文件中,跳过配置
+            else			 
+                echo defined MAVEN_HOME variable
+                # 直接在profile末尾添加新行 
+                echo 'export MAVEN_HOME=/usr/local/maven' >> /etc/profile
+                echo 'export PATH=$PATH:$MAVEN_HOME/bin' >> /etc/profile	
+
+                echo -e "环境变量已配置完成"
+                grep $reg_str /etc/profile
+				
+                echo -e "重载配置文件，使环境变量生效"
+                source /etc/profile
+                echo -e "环境变量已生效"
+            fi
+				
+            echo -e "检查是否安装成功"
+            mvn -version
+		
+            echo -e "-----------------------------------------------"
+            echo -e "maven 3.6.3 安装完成"
             
             read -p "按任意键继续"
         fi
