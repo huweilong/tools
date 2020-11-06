@@ -49,7 +49,7 @@ grep "model name" /proc/cpuinfo | cut -f2 -d:
 read -p "按任意键进入安装主程序"
 echo -e "正在为您初始化必要的插件"
 sleep 1
-yum -y install vim wget links net-tools yum-utils device-mapper-persistent-data lvm2 lrzsz zip unzip
+yum -y install vim wget net-tools yum-utils device-mapper-persistent-data lvm2 lrzsz zip unzip
 
 while [ ${isFinish} -eq 0 ] ;do
     echo -e "\t"
